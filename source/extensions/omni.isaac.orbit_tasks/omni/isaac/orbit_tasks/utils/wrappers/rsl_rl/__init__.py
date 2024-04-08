@@ -6,5 +6,9 @@
 """Wrappers and utilities to configure an :class:`RLTaskEnv` for RSL-RL library."""
 
 from .exporter import export_policy_as_jit, export_policy_as_onnx
-from .rl_cfg import RslRlOnPolicyRunnerCfg, RslRlPpoActorCriticCfg, RslRlPpoAlgorithmCfg
+from .rl_cfg import (
+    RslRlOnPolicyRunnerCfg, 
+    RslRlPpoActorCriticCfg, RslRlPpoAlgorithmCfg, 
+    RslRlPpgActorCriticCfg, RslRlPpgAlgorithmCfg
+)
 from .vecenv_wrapper import RslRlVecEnvWrapper

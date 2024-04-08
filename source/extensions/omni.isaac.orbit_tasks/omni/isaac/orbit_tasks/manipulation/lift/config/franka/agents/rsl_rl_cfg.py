@@ -7,8 +7,8 @@ from omni.isaac.orbit.utils import configclass
 
 from omni.isaac.orbit_tasks.utils.wrappers.rsl_rl import (
     RslRlOnPolicyRunnerCfg,
-    RslRlPpoActorCriticCfg,
-    RslRlPpoAlgorithmCfg,
+    RslRlPpoActorCriticCfg, RslRlPpoAlgorithmCfg,
+    RslRlPpgActorCriticCfg, RslRlPpgAlgorithmCfg
 )
 
 
@@ -38,4 +38,34 @@ class LiftCubePPORunnerCfg(RslRlOnPolicyRunnerCfg):
         lam=0.95,
         desired_kl=0.01,
         max_grad_norm=1.0,
+    )
+
+@configclass
+class LiftCubePPGRunnerCfg(RslRlOnPolicyRunnerCfg):
+    num_steps_per_env = 24
+    max_iterations = 1500
+    save_interval = 50
+    experiment_name = "franka_lift"
+    empirical_normalization = False
+    policy = RslRlPpgActorCriticCfg(
+        init_noise_std=1.0,
+        actor_hidden_dims=[256, 128, 64],
+        critic_hidden_dims=[256, 128, 64],
+        activation="elu",
+    )
+    algorithm = RslRlPpgAlgorithmCfg(
+        value_loss_coef=1.0,
+        use_clipped_value_loss=True,
+        clip_param=0.2,
+        entropy_coef=0.006,
+        num_learning_epochs=5,
+        num_mini_batches=4,
+        learning_rate=1.0e-4,
+        schedule="adaptive",
+        gamma=0.98,
+        lam=0.95,
+        desired_kl=0.01,
+        max_grad_norm=1.0,
+        beta_clone=1.0,
+        num_policy_updates_per_aux=16,
     )

@@ -76,6 +76,76 @@ class RslRlPpoAlgorithmCfg:
 
 
 @configclass
+class RslRlPpgActorCriticCfg:
+    """Configuration for the PPG actor-critic networks."""
+
+    class_name: str = "ActorCriticPpg"
+    """The policy class name. Default is ActorCritic."""
+
+    init_noise_std: float = MISSING
+    """The initial noise standard deviation for the policy."""
+
+    actor_hidden_dims: list[int] = MISSING
+    """The hidden dimensions of the actor network."""
+
+    critic_hidden_dims: list[int] = MISSING
+    """The hidden dimensions of the critic network."""
+
+    activation: str = MISSING
+    """The activation function for the actor and critic networks."""
+
+
+@configclass
+class RslRlPpgAlgorithmCfg:
+    """Configuration for the PPG algorithm."""
+
+    class_name: str = "PPG"
+    """The algorithm class name. Default is PPG."""
+
+    value_loss_coef: float = MISSING
+    """The coefficient for the value loss."""
+
+    use_clipped_value_loss: bool = MISSING
+    """Whether to use clipped value loss."""
+
+    clip_param: float = MISSING
+    """The clipping parameter for the policy."""
+
+    entropy_coef: float = MISSING
+    """The coefficient for the entropy loss."""
+
+    num_learning_epochs: int = MISSING
+    """The number of learning epochs per update."""
+
+    num_mini_batches: int = MISSING
+    """The number of mini-batches per update."""
+
+    learning_rate: float = MISSING
+    """The learning rate for the policy."""
+
+    schedule: str = MISSING
+    """The learning rate schedule."""
+
+    gamma: float = MISSING
+    """The discount factor."""
+
+    lam: float = MISSING
+    """The lambda parameter for Generalized Advantage Estimation (GAE)."""
+
+    desired_kl: float = MISSING
+    """The desired KL divergence."""
+
+    max_grad_norm: float = MISSING
+    """The maximum gradient norm."""
+    
+    beta_clone: float = MISSING
+    """The beta_clone parameter for joint loss in auxiliary phase."""
+    
+    num_policy_updates_per_aux: int = MISSING
+    """The ratio of policy phase and auxiliary phase."""
+
+
+@configclass
 class RslRlOnPolicyRunnerCfg:
     """Configuration of the runner for on-policy algorithms."""
 
@@ -94,10 +164,10 @@ class RslRlOnPolicyRunnerCfg:
     empirical_normalization: bool = MISSING
     """Whether to use empirical normalization."""
 
-    policy: RslRlPpoActorCriticCfg = MISSING
+    policy: RslRlPpoActorCriticCfg | RslRlPpgActorCriticCfg = MISSING
     """The policy configuration."""
 
-    algorithm: RslRlPpoAlgorithmCfg = MISSING
+    algorithm: RslRlPpoAlgorithmCfg | RslRlPpgAlgorithmCfg = MISSING
     """The algorithm configuration."""
 
     ##

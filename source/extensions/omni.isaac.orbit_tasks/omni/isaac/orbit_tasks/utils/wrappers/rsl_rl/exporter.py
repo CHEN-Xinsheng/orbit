@@ -6,6 +6,7 @@
 import copy
 import os
 import torch
+from rsl_rl.modules import ActorCritic, ActorCriticPpg
 
 
 def export_policy_as_jit(actor_critic: object, path: str, filename="policy.pt"):
@@ -94,7 +95,15 @@ class _OnnxPolicyExporter(torch.nn.Module):
     def __init__(self, actor_critic, verbose=False):
         super().__init__()
         self.verbose = verbose
-        self.actor = copy.deepcopy(actor_critic.actor)
+        if isinstance(actor_critic, ActorCritic):
+            self.actor = copy.deepcopy(actor_critic.actor)
+            self.is_ppo = True
+        elif isinstance(actor_critic, ActorCriticPpg):
+            self.actor_base = copy.deepcopy(actor_critic.actor_base)
+            self.action_head = copy.deepcopy(actor_critic.action_head)
+            self.is_ppo = False
+        else:
+            raise ValueError("Unsupported actor-critic model.")
         self.is_recurrent = actor_critic.is_recurrent
         if self.is_recurrent:
             self.rnn = copy.deepcopy(actor_critic.memory_a.rnn)
@@ -104,10 +113,14 @@ class _OnnxPolicyExporter(torch.nn.Module):
     def forward_lstm(self, x_in, h_in, c_in):
         x, (h, c) = self.rnn(x_in.unsqueeze(0), (h_in, c_in))
         x = x.squeeze(0)
-        return self.actor(x), h, c
+        # return self.actor(x), h, c
+        return self.forward(x), h, c
 
     def forward(self, x):
-        return self.actor(x)
+        if self.is_ppo:
+            return self.actor(x)
+        else:
+            return self.action_head(self.actor_base(x))
 
     def export(self, path, filename):
         self.to("cpu")
@@ -128,7 +141,8 @@ class _OnnxPolicyExporter(torch.nn.Module):
                 dynamic_axes={},
             )
         else:
-            obs = torch.zeros(1, self.actor[0].in_features)
+            obs = torch.zeros(1, self.actor[0].in_features) if self.is_ppo else \
+                    torch.zeros(1, self.actor_base[0].in_features)
             torch.onnx.export(
                 self,
                 obs,
